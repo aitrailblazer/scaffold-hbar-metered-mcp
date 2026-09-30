@@ -7,7 +7,7 @@ This repo is a public MIT template: a metered MCP server on Hedera testnet. Ever
 - `packages/nextjs`: the product. MCP route, receipt feed, setup-flow home page.
   - `lib/metering.ts`: pricing config, spent-tx registry, mirror node payment verification, tool definitions and handlers.
   - `lib/receipts.ts`: in memory receipt buffer plus best effort HCS submit.
-  - `app/api/mcp/route.ts`: `GET` manifest, `POST` tool calls. Built on `@modelcontextprotocol/sdk` (`McpServer` with the same tool handlers).
+  - `app/api/mcp/route.ts`: `GET` manifest, `POST` tool calls. The `McpServer` definition in `lib/mcp-server.ts` registers the same tools from `TOOL_DEFS` for other MCP transports.
   - `app/api/receipts/route.ts`: local receipts plus best effort mirror node topic read.
   - `app/page.tsx`: four step setup flow (configure, free ping, paid call, receipts).
 - `packages/hardhat`: baseline HTS demo contracts, untouched. No new contract: metering settles in native HBAR and receipts live on HCS, so an on chain registry would add cost without changing trust. Do not add one casually.

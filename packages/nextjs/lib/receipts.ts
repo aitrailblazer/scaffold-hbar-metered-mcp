@@ -55,10 +55,7 @@ async function submitToHcsTopic(topicId: string, payload: string): Promise<strin
     const client = sdk.Client.forTestnet();
     client.setOperator(operatorId, operatorKey);
     try {
-      const tx = await new sdk.TopicMessageSubmitTransaction()
-        .setTopicId(topicId)
-        .setMessage(payload)
-        .execute(client);
+      const tx = await new sdk.TopicMessageSubmitTransaction().setTopicId(topicId).setMessage(payload).execute(client);
       const receipt = await tx.getReceipt(client);
       void receipt;
       return tx.transactionId?.toString();

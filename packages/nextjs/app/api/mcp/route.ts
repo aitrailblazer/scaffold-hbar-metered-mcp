@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import {
-  TOOL_DEFS,
-  executeTool,
-  getMeterConfig,
-  getToolDef,
-  markSpent,
-  verifyPayment,
-} from "~~/lib/metering";
+import { TOOL_DEFS, executeTool, getMeterConfig, getToolDef, markSpent, verifyPayment } from "~~/lib/metering";
 import { recordReceipt } from "~~/lib/receipts";
 
 /**
@@ -47,23 +39,6 @@ type McpRequestBody = {
   paymentTxId?: unknown;
 };
 
-/** The MCP server definition behind this route. Same tools, same handlers. */
-export function buildMcpServer() {
-  const server = new McpServer({ name: "scaffold-hbar-metered-mcp", version: "0.1.0" });
-  for (const def of TOOL_DEFS) {
-    server.registerTool(
-      def.name,
-      { description: def.description, inputSchema: def.shape },
-      async args => {
-        const config = getMeterConfig();
-        const result = await executeTool(def.name, args, config);
-        return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
-      },
-    );
-  }
-  return server;
-}
-
 export async function POST(req: Request) {
   let body: McpRequestBody;
   try {
@@ -80,10 +55,7 @@ export async function POST(req: Request) {
   }
   const def = getToolDef(body.tool);
   if (!def) {
-    return NextResponse.json(
-      { error: "UNKNOWN_TOOL", message: `Unknown tool "${body.tool}".` },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "UNKNOWN_TOOL", message: `Unknown tool "${body.tool}".` }, { status: 400 });
   }
 
   let parsedParams: unknown = body.params ?? {};
@@ -143,4 +115,3 @@ function toolError(err: unknown) {
   console.error("[api/mcp]", err);
   return NextResponse.json({ error: "TOOL_FAILED", message: "Tool execution failed." }, { status: 500 });
 }
-

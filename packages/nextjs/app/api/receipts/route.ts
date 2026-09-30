@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listRecentReceipts, type UsageReceipt } from "~~/lib/receipts";
+import { type UsageReceipt, listRecentReceipts } from "~~/lib/receipts";
 
 /**
  * Receipt feed for the home page. Returns locally recorded receipts plus,
@@ -14,7 +14,7 @@ export async function GET() {
   );
   const local = listRecentReceipts();
 
-  let onChain: UsageReceipt[] = [];
+  const onChain: UsageReceipt[] = [];
   if (/^0\.0\.\d+$/.test(topicId)) {
     try {
       const controller = new AbortController();

@@ -94,11 +94,7 @@ const Home: NextPage = () => {
     setCallResult("");
     setCallError("");
     const params =
-      tool === "account_balance"
-        ? { accountId }
-        : tool === "topic_messages"
-          ? { topicId, limit: 5 }
-          : { message };
+      tool === "account_balance" ? { accountId } : tool === "topic_messages" ? { topicId, limit: 5 } : { message };
     try {
       const res = await fetch("/api/mcp", {
         method: "POST",
@@ -124,8 +120,8 @@ const Home: NextPage = () => {
       <div className="w-full max-w-3xl mt-8">
         <h1 className="text-3xl font-bold mb-2">Metered MCP on Hedera</h1>
         <p className="text-base-content/70 mb-6">
-          Every MCP tool call settles in HBAR on Hedera testnet. Pay a small amount per call, the server verifies
-          the transfer on the mirror node, runs the tool, and writes a usage receipt to HCS.
+          Every MCP tool call settles in HBAR on Hedera testnet. Pay a small amount per call, the server verifies the
+          transfer on the mirror node, runs the tool, and writes a usage receipt to HCS.
         </p>
 
         {manifestError && (
@@ -136,8 +132,8 @@ const Home: NextPage = () => {
         {manifest && !manifest.treasuryConfigured && (
           <div className="alert alert-warning mb-4">
             <span>
-              Treasury is not configured. Copy .env.example, set METER_TREASURY_ACCOUNT, and restart the server
-              before paid calls can succeed.
+              Treasury is not configured. Copy .env.example, set METER_TREASURY_ACCOUNT, and restart the server before
+              paid calls can succeed.
             </span>
           </div>
         )}
@@ -193,8 +189,8 @@ const Home: NextPage = () => {
           <h2 className="text-xl font-semibold mb-1">3. Pay for a metered call</h2>
           <p className="text-sm text-base-content/70 mb-4">
             Send {manifest?.priceTinybar ?? ""} tinybar to{" "}
-            <span className="font-mono">{manifest?.treasury ?? "the treasury"}</span> from any testnet wallet,
-            paste the payment transaction id, then call the tool. Each transaction id works exactly once.
+            <span className="font-mono">{manifest?.treasury ?? "the treasury"}</span> from any testnet wallet, paste the
+            payment transaction id, then call the tool. Each transaction id works exactly once.
           </p>
           <div className="grid grid-cols-1 gap-3">
             <label className="form-control">

@@ -21,7 +21,18 @@ export const MAX_PAYMENT_AGE_SEC = 30 * 60;
 
 export const MAX_SPENT_ENTRIES = 2000;
 
-export const TX_ID_RE = /^0\.0\.\d+@\d+\.\d+$/;
+export const TX_ID_RE = /^0\.0\.\d+[@-]\d+[.-]\d+$/;
+
+/** Mirror node path lookups need shard.realm.num-sss-nnn; clients send @ form. */
+export function normalizeTxIdForMirror(paymentTxId: string): string {
+  const m = paymentTxId.match(/^0\.0\.(\d+)[@-](\d+)[.-](\d+)$/);
+  if (!m) return paymentTxId;
+  return `0.0.${m[1]}-${m[2]}-${m[3]}`;
+}
+
+function txIdDigits(paymentTxId: string): string {
+  return paymentTxId.replace(/[^0-9]/g, "");
+}
 
 export const ACCOUNT_ID_RE = /^0\.0\.\d+$/;
 
@@ -84,11 +95,12 @@ type MirrorTransaction = {
   transfers?: Array<{ account?: string; amount?: number }>;
 };
 
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchJson(url: string): Promise<unknown | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10_000);
   try {
     const res = await fetch(url, { signal: controller.signal });
+    if (res.status === 404) return null;
     if (!res.ok) {
       throw new MeterError("MIRROR_LOOKUP_FAILED", `Mirror node request failed with status ${res.status}.`, 502);
     }
@@ -121,7 +133,7 @@ export async function verifyPayment(
   if (!TX_ID_RE.test(paymentTxId)) {
     throw new MeterError(
       "INVALID_TX_ID",
-      "paymentTxId must look like 0.0.123@1727712000.123456789.",
+      "paymentTxId must look like 0.0.123@1727712000.123456789 (dash form also accepted).",
       400,
     );
   }
@@ -136,10 +148,11 @@ export async function verifyPayment(
     throw new MeterError("PAYMENT_ALREADY_SPENT", "This payment transaction was already used.", 409);
   }
 
-  const data = (await fetchJson(
-    `${config.mirrorBase}/api/v1/transactions/${paymentTxId}`,
-  )) as { transactions?: MirrorTransaction[] };
-  const tx = (data.transactions ?? []).find(t => t.transaction_id === paymentTxId);
+  const data = (await fetchJson(`${config.mirrorBase}/api/v1/transactions/${normalizeTxIdForMirror(paymentTxId)}`)) as {
+    transactions?: MirrorTransaction[];
+  } | null;
+  const want = txIdDigits(paymentTxId);
+  const tx = (data?.transactions ?? []).find(t => t.transaction_id && txIdDigits(t.transaction_id) === want);
   if (!tx) {
     throw new MeterError(
       "PAYMENT_NOT_FOUND",
@@ -263,8 +276,8 @@ export async function executeTool(
     const data = (await fetchJson(`${config.mirrorBase}/api/v1/accounts/${accountId}`)) as {
       account?: string;
       balance?: { balance?: number };
-    };
-    if (!data.account) {
+    } | null;
+    if (!data?.account) {
       throw new MeterError("ACCOUNT_NOT_FOUND", `Account ${accountId} not found on testnet.`, 404);
     }
     const tinybar = data.balance?.balance ?? 0;
@@ -274,7 +287,10 @@ export async function executeTool(
     const { topicId, limit } = TopicMessagesParams.parse(params);
     const data = (await fetchJson(
       `${config.mirrorBase}/api/v1/topics/${topicId}/messages?limit=${limit}&order=desc`,
-    )) as { messages?: Array<{ consensus_timestamp?: string; sequence_number?: number; message?: string }> };
+    )) as { messages?: Array<{ consensus_timestamp?: string; sequence_number?: number; message?: string }> } | null;
+    if (!data) {
+      throw new MeterError("TOPIC_NOT_FOUND", `Topic ${topicId} not found on testnet.`, 404);
+    }
     const messages = (data.messages ?? []).map(m => ({
       sequenceNumber: m.sequence_number,
       consensusTimestamp: m.consensus_timestamp,
