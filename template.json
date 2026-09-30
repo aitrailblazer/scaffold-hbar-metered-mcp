@@ -6,7 +6,7 @@
     "rename": {
       "scaffold-hbar-metered-mcp": {
         "to": "{{projectName}}",
-        "paths": ["package.json", "README.md", "packages/nextjs/lib/mcp-server.ts"]
+        "paths": ["."]
       }
     },
     "instructions": [
