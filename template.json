@@ -4,54 +4,58 @@
   "version": "0.1.0",
   "create-scaffold-hbar": {
     "rename": {
-      "from": "scaffold-hbar-metered-mcp",
-      "to": "{projectName}"
+      "scaffold-hbar-metered-mcp": {
+        "to": "{{projectName}}",
+        "paths": ["package.json", "README.md", "packages/nextjs/lib/mcp-server.ts"]
+      }
     },
-    "instructions": "Copy .env.example to .env, set METER_TREASURY_ACCOUNT to your testnet account, fund it from the Hedera Portal faucet, then run yarn install and yarn next:start. Open http://localhost:3000 and follow the setup flow: try the free ping, pay for a metered call, view receipts.",
+    "instructions": [
+      "Copy .env.example to .env and set METER_TREASURY_ACCOUNT to your Hedera testnet account.",
+      "Fund that account with testnet HBAR from the Hedera Portal faucet.",
+      "Install, then start the app and follow the setup flow: try the free ping, pay for a metered call, view receipts."
+    ],
     "requirements": {
-      "node": ">= 20.18.3",
-      "packageManager": "npm or yarn"
+      "node": ">= 20.18.3"
     },
     "envVars": [
       {
-        "name": "METER_TREASURY_ACCOUNT",
-        "description": "Testnet account that receives per-call HBAR payments, for example 0.0.123456.",
-        "required": true
+        "key": "METER_TREASURY_ACCOUNT",
+        "description": "Testnet account that receives per-call HBAR payments, for example 0.0.123456."
       },
       {
-        "name": "METER_PRICE_TINYBAR",
-        "description": "Price per paid MCP tool call in tinybar. Default 10000.",
-        "required": false,
-        "default": "10000"
+        "key": "METER_PRICE_TINYBAR",
+        "description": "Price per paid MCP tool call in tinybar. Default 10000."
       },
       {
-        "name": "HCS_RECEIPT_TOPIC_ID",
-        "description": "Testnet HCS topic for usage receipts, for example 0.0.789012.",
-        "required": false
+        "key": "HCS_RECEIPT_TOPIC_ID",
+        "description": "Testnet HCS topic for usage receipts, for example 0.0.789012."
       },
       {
-        "name": "HEDERA_OPERATOR_ID",
-        "description": "Testnet operator account id for submitting HCS receipts. Optional.",
-        "required": false
+        "key": "HEDERA_OPERATOR_ID",
+        "description": "Testnet operator account id for submitting HCS receipts. Optional."
       },
       {
-        "name": "HEDERA_OPERATOR_KEY",
-        "description": "Testnet operator private key for submitting HCS receipts. Optional, never commit.",
-        "required": false
+        "key": "HEDERA_OPERATOR_KEY",
+        "description": "Testnet operator key for submitting HCS receipts. Optional, never commit."
       }
     ],
     "capabilities": {
-      "frontend": "nextjs-app",
-      "solidity": {
-        "framework": "hardhat"
-      },
-      "packageManager": "yarn",
-      "node": ">= 20.18.3"
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["hardhat"],
+      "packageManager": ["yarn", "npm"]
     },
     "defaults": {
-      "network": "testnet",
-      "priceTinybar": 10000
+      "frontend": "nextjs-app",
+      "solidityFramework": "hardhat",
+      "packageManager": "yarn"
     },
-    "outro": "Metered MCP template ready. Run yarn next:start, open http://localhost:3000, and pay for your first tool call on Hedera testnet. Verify payments and receipts on HashScan."
+    "outro": {
+      "steps": [
+        "+Start the app",
+        "{run:next:start} then open http://localhost:3000",
+        "+Pay for your first tool call on Hedera testnet",
+        "Send the listed tinybar amount to the treasury, paste the payment transaction id, and verify the receipt on HashScan"
+      ]
+    }
   }
 }
