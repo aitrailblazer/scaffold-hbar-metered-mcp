@@ -53,7 +53,13 @@ async function submitToHcsTopic(topicId: string, payload: string): Promise<strin
   try {
     const sdk = await import("@hiero-ledger/sdk");
     const client = sdk.Client.forTestnet();
-    client.setOperator(operatorId, operatorKey);
+    // Hex ECDSA keys must be parsed explicitly: PrivateKey.fromString()
+    // misdetects raw hex and every HCS submit then fails INVALID_SIGNATURE.
+    const keyText = operatorKey.trim();
+    const opKey = /^(0x)?[0-9a-fA-F]{64}$/.test(keyText)
+      ? sdk.PrivateKey.fromStringECDSA(keyText.replace(/^0x/, ""))
+      : sdk.PrivateKey.fromString(keyText);
+    client.setOperator(operatorId, opKey);
     try {
       const tx = await new sdk.TopicMessageSubmitTransaction().setTopicId(topicId).setMessage(payload).execute(client);
       const receipt = await tx.getReceipt(client);

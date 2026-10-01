@@ -60,6 +60,17 @@ Open [http://localhost:3000](http://localhost:3000) and follow the setup flow: c
 
 The home page links every receipt to HashScan. A real testnet payment plus HCS receipt is the bounty proof item; it needs a funded testnet account from the faucet, which is a human step.
 
+## Live bounty proof
+
+Verified end to end on Hedera testnet, 2026-10-01:
+
+- HCS receipt topic: https://hashscan.io/testnet/topic/0.0.10815231
+- Treasury: https://hashscan.io/testnet/account/0.0.9676074
+- Payment (10,000 tinybar from payer 0.0.10815232 to the treasury): https://hashscan.io/testnet/transaction/0.0.10815232-1790890102-850774548
+- HCS usage receipt submit: https://hashscan.io/testnet/transaction/0.0.9676074-1790890112-480828466
+
+Flow: created the receipt topic, booted the template with the treasury configured, paid 10,000 tinybar from a funded payer account, called the paid `echo` tool with the payment id (HTTP 200), and the server submitted the usage receipt to the HCS topic. The payment was verified against the testnet mirror node before the tool ran, and the mirror node nets self-transfers to zero, so the proof uses a distinct funded payer account.
+
 ## API shape
 
 ```bash
